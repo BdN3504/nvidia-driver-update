@@ -1,6 +1,6 @@
 variablesScript=$(basename "$0")
 
-baseUrl=http://download.nvidia.com/XFree86/Linux-x86_64/
+baseUrl=https://download.nvidia.com/XFree86/Linux-x86_64/
 fileNamePrefix=NVIDIA-Linux-x86_64-
 fileNameSuffix=.run
 publicKeyFilePath=/root/mok.pem
