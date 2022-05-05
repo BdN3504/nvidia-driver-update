@@ -42,7 +42,8 @@ read -r KBUILD_SIGN_PIN
 stty echo
 printf "\n"
 export "KBUILD_SIGN_PIN"
-sh ./"$latestDriver" -s --module-signing-secret-key="$privateKeyFilePath" --module-signing-public-key="$publicKeyFilePath"
+echo "Going to run sh ./$latestVersionFileName --module-signing-secret-key=$privateKeyFilePath --module-signing-public-key=$publicKeyFilePath"
+sh ./"$latestVersionFileName" -s --module-signing-secret-key="$privateKeyFilePath" --module-signing-public-key="$publicKeyFilePath"
 nvidia-xconfig
 
 if [ $wgetInstalled -ne 0 ]
