@@ -22,19 +22,12 @@ then
   apt -yq install ncat
 fi
 
-dpkg -s wget &> /dev/null
-wgetInstalled=$?
-if [ $wgetInstalled -ne 0 ]
-then
-  apt -yq install wget
-fi
-
 latestVersionDirectory=$(curl --silent "$baseUrl" | pup 'ul.directorycontents li span.dir json{}' | jq -r ".[-1].children[0].href")
 latestVersionFileName="$fileNamePrefix${latestVersionDirectory::-1}$fileNameSuffix"
 latestVersionUrl="$baseUrl$latestVersionDirectory$latestVersionFileName"
 if [ ! -f "$latestVersionFileName" ]
 then
-  wget -O "$latestVersionFileName" "$latestVersionUrl"
+  curl --location --output "$latestVersionFileName" "$latestVersionUrl"
 fi
 stty -echo
 printf "Enter signing pin: "
@@ -45,11 +38,6 @@ export "KBUILD_SIGN_PIN"
 echo "Going to run sh ./$latestVersionFileName --module-signing-secret-key=$privateKeyFilePath --module-signing-public-key=$publicKeyFilePath"
 sh ./"$latestVersionFileName" -s --module-signing-secret-key="$privateKeyFilePath" --module-signing-public-key="$publicKeyFilePath"
 nvidia-xconfig
-
-if [ $wgetInstalled -ne 0 ]
-then
-  apt -yq purge wget
-fi
 
 if [ $jqInstalled -ne 0 ]
 then
