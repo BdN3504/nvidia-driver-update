@@ -19,7 +19,7 @@ dpkg -s jq &> /dev/null
 jqInstalled=$?
 if [ $jqInstalled -ne 0 ]
 then
-  apt -yq install ncat
+  apt -yq install jq
 fi
 
 latestVersionDirectory=$(curl --silent "$baseUrl" | pup 'ul.directorycontents li span.dir json{}' | jq -r ".[-1].children[0].href")
