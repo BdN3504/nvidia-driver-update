@@ -9,9 +9,13 @@ at a terminal though.
 To overcome the struggle of manually installing the driver after each kernel update, you can
 use this script.
 
+With `--dkms` the kernel module is rebuilt automatically on kernel updates, so the script is
+mainly needed to install the driver for the first time and to move to a newer driver version.
+
 ## Assumptions
 1. You are running debian.
-2. You already have enrolled a key pair to MOK.
+2. If secure boot is enabled, you already have enrolled a key pair to MOK. Without secure boot
+   no keys are needed.
 3. You are online.
 
 ## Usage
@@ -23,19 +27,29 @@ Run `/bin/bash driver-update-variables.sh`. This will interactively set the foll
 | baseUrl  | URL to nvidia's driver directory. Other architectures are listed [here](http://download.nvidia.com/XFree86/). | http://download.nvidia.com/XFree86/Linux-x86_64/  |
 | fileNamePrefix  | Prefix of the driver file name. Adjust according to your architecture. | NVIDIA-Linux-x86_64-  |
 | fileNameSuffix  |  Suffix of the driver file name. | .run  |
-| publicKeyFilePath  | Path to the public part of the key pair which has to have been previously enrolled in the MOK storage.  | /root/mok.pem  |
-| privateKeyFilePath  | Path to the private part of the key pair which has to have been previously enrolled in the MOK storage.  | /root/mok.priv |
+| driverVersion  | Driver version to install, e.g. `580.126.09`. `latest` uses the version from nvidia's `latest.txt`. | latest  |
+| kernelModuleType  | `open` for Turing (RTX 20xx / GTX 16xx) and newer GPUs, `proprietary` for older ones. | open  |
+| runNvidiaXconfig  | `yes` lets the installer write an X configuration for the nvidia GPU. Keep `no` on laptops where the integrated GPU drives the screens, the generated configuration breaks the desktop there. | no  |
+| publicKeyFilePath  | Path to the public part of the key pair which has to have been previously enrolled in the MOK storage. Only used with secure boot.  | /root/mok.pem  |
+| privateKeyFilePath  | Path to the private part of the key pair which has to have been previously enrolled in the MOK storage. Only used with secure boot.  | /root/mok.priv |
 
-### 2. Update and install the latest driver
-Login to a root shell and execute the `driver-update.sh` script. 
+### 2. Update and install the driver
+Switch to a text console (e.g. Ctrl+Alt+F3), login as root and execute the `driver-update.sh`
+script. The script stops the display manager, which also ends any terminal running inside the
+graphical session.
 
-The script depends on curl to query the base url, it then uses pup to transform the curl 
-output to json and finally filters that using jq. After retrieving the latest file name 
-wget is used to download it.
+The script
+1. installs `dkms` and the kernel headers meta package, so the module can be rebuilt for future kernels.
+2. downloads the driver with curl and verifies its checksums.
+3. purges a driver installed from the distribution's packages (every installed package whose
+   name contains `nvidia`, `libcuda` or `libnvcuvid`). Check the list apt shows before confirming.
+4. blacklists nouveau if no blacklist is left.
+5. stops the display manager and unloads the old kernel modules. If a module is still in use,
+   reboot and run the script again.
+6. runs the installer with `--dkms` and the configured kernel module type.
 
-Once the download has finished, you need to provide the passphrase to the key pair which 
-has been enrolled in the MOK storage. If you have not secured the key pair with a 
-passphrase just press enter.
+If secure boot is enabled, you need to provide the passphrase to the key pair which has been
+enrolled in the MOK storage before the installer runs. If you have not secured the key pair
+with a passphrase just press enter.
 
-The script then executes the downloaded file and provides all the parameters needed to install
-and sign the driver. After the installation is complete, `nvidia-xconfig` is invoked.
+Reboot after the installation has finished.
