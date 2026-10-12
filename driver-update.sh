@@ -19,15 +19,38 @@ fi
 apt -yq install dkms "linux-headers-$(dpkg --print-architecture)" || exit 1
 
 # Download and verify the driver before touching the running system
+if [ "$driverVersion" == "latest" ] || [ "$driverVersion" == "newest" ]
+then
+  # The directory listing contains one "<version>/" directory per release
+  newestVersion=$(curl --silent --fail "$baseUrl" | grep -oE "href='[0-9]+(\.[0-9]+)+/'" | grep -oE "[0-9]+(\.[0-9]+)+" | sort -V | tail -n 1)
+  if [ -z "$newestVersion" ]
+  then
+    echo "Could not read the driver versions from $baseUrl" >&2
+    exit 1
+  fi
+fi
 if [ "$driverVersion" == "latest" ]
 then
   # latest.txt contains "<version> <version>/<file name>"
-  read -r driverVersion _ < <(curl --silent --fail "${baseUrl}latest.txt")
-  if [ -z "$driverVersion" ]
+  read -r latestVersion _ < <(curl --silent --fail "${baseUrl}latest.txt")
+  if [ -z "$latestVersion" ]
   then
     echo "Could not read ${baseUrl}latest.txt" >&2
     exit 1
   fi
+  driverVersion=$latestVersion
+  # nvidia's latest.txt points to the recommended release, which can lag behind the newest one
+  if [ "$latestVersion" != "$newestVersion" ]
+  then
+    read -r -p "Install the latest recommended driver $latestVersion or the newest driver $newestVersion? [L/n] " installNewest
+    if [[ "$installNewest" == [nN]* ]]
+    then
+      driverVersion=$newestVersion
+    fi
+  fi
+elif [ "$driverVersion" == "newest" ]
+then
+  driverVersion=$newestVersion
 fi
 driverFileName="$fileNamePrefix$driverVersion$fileNameSuffix"
 driverUrl="$baseUrl$driverVersion/$driverFileName"

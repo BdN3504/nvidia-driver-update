@@ -27,7 +27,7 @@ Run `/bin/bash driver-update-variables.sh`. This will interactively set the foll
 | baseUrl  | URL to nvidia's driver directory. Other architectures are listed [here](http://download.nvidia.com/XFree86/). | http://download.nvidia.com/XFree86/Linux-x86_64/  |
 | fileNamePrefix  | Prefix of the driver file name. Adjust according to your architecture. | NVIDIA-Linux-x86_64-  |
 | fileNameSuffix  |  Suffix of the driver file name. | .run  |
-| driverVersion  | Driver version to install, e.g. `580.126.09`. `latest` uses the version from nvidia's `latest.txt`. | latest  |
+| driverVersion  | Driver version to install, e.g. `580.126.09`. `latest` uses the recommended version from nvidia's `latest.txt`, which can lag behind the newest release; if the two differ, the script asks which one to install. `newest` installs the highest version in nvidia's directory listing without asking. | latest  |
 | kernelModuleType  | `open` for Turing (RTX 20xx / GTX 16xx) and newer GPUs, `proprietary` for older ones. | open  |
 | runNvidiaXconfig  | `yes` lets the installer write an X configuration for the nvidia GPU. Keep `no` on laptops where the integrated GPU drives the screens, the generated configuration breaks the desktop there. | no  |
 | publicKeyFilePath  | Path to the public part of the key pair which has to have been previously enrolled in the MOK storage. Only used with secure boot.  | /root/mok.pem  |

@@ -24,7 +24,7 @@ then
   fileNameSuffix=${fileNameSuffixInput:-$fileNameSuffix}
   sed -i -E "s|^(fileNameSuffix=).*$|\1$fileNameSuffix|g" "$variablesScript"
 
-  read -e -i "$driverVersion" -p "Driver version to install, e.g. 580.126.09, or latest: " driverVersionInput
+  read -e -i "$driverVersion" -p "Driver version to install, e.g. 580.126.09, latest (asks whether to install the recommended or the newest driver) or newest: " driverVersionInput
   driverVersion=${driverVersionInput:-$driverVersion}
   sed -i -E "s|^(driverVersion=).*$|\1$driverVersion|g" "$variablesScript"
 
